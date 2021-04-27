@@ -1,0 +1,139 @@
+# To create and review example deployment YAML files, run the following commands:
+# (Cf. https://hub.docker.com/_/microsoft-dotnet-samples)
+# kubectl create deployment hello-asp-dotnet --image=mcr.microsoft.com/dotnet/samples:aspnetapp --port=80
+# kubectl expose deployment hello-asp-dotnet --type=LoadBalancer --port=80
+# Now you can review the results:
+# KUBE_EDITOR="nano" kubectl edit deployment hello-asp-dotnet
+# KUBE_EDITOR="nano" kubectl edit service hello-asp-dotnet
+# Optional cleanup step:
+# kubectl delete service hello-asp-dotnet
+# kubectl delete deployment hello-asp-dotnet
+# For another example basic configuration see:
+# https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/#creating-and-exploring-an-nginx-deployment
+# Advanced configurations can be found under:
+# https://www.azuredevopslabs.com/labs/vstsextend/kubernetes/
+# https://github.com/Microsoft/azuredevopslabs/tree/master/labs/vstsextend/kubernetes/
+# or
+# https://github.com/dotnet-architecture/eShopOnContainers/wiki/Deploy-to-Local-Kubernetes
+---
+# https://docs.microsoft.com/en-us/sql/linux/tutorial-sql-server-containers-kubernetes?view=sql-server-ver15
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-mongo-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-server
+spec:
+  selector:
+    matchLabels:
+      app: mssql-server
+  template:
+    metadata:
+      labels:
+        app: mssql-server
+    spec:
+      containers:
+        - image: mcr.microsoft.com/mssql/server:2019-latest
+          name: mssql-server
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: "yourStrong(!)Password"
+---
+# https://docs.microsoft.com/en-us/sql/linux/tutorial-sql-server-containers-kubernetes?view=sql-server-ver15
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-mongodb-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-server
+spec:
+  selector:
+    app: mssql-server
+  ports:
+    - port: 1433
+      targetPort: 1433
+---
+# https://docs.microsoft.com/en-us/dotnet/architecture/containerized-lifecycle/design-develop-containerized-apps/build-aspnet-core-applications-linux-containers-aks-kubernetes#deploy-webapiyml
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-guestbook-frontend-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-api
+spec:
+  selector:
+    matchLabels:
+      app: web-api
+  template:
+    metadata:
+      labels:
+        app: web-api
+    spec:
+      containers:
+        - image: demo-web-api:v1
+          name: web-api
+          ports:
+            - containerPort: 8081
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://+:8081
+            - name: MSSQL_SERVER_CONNECTION_STRING
+              value: Server=mssql-server;Database=AspNetKubernetesDemo;User Id=SA;Password=yourStrong(!)Password;
+---
+# https://docs.microsoft.com/en-us/dotnet/architecture/containerized-lifecycle/design-develop-containerized-apps/build-aspnet-core-applications-linux-containers-aks-kubernetes#deploy-webapiyml
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-frontend-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-api
+spec:
+  selector:
+    app: web-api
+  ports:
+    - port: 8081
+      targetPort: 8081
+---
+# https://docs.microsoft.com/en-us/dotnet/architecture/containerized-lifecycle/design-develop-containerized-apps/build-aspnet-core-applications-linux-containers-aks-kubernetes#deploy-webappyml
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-guestbook-frontend-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+        - image: demo-web-app:v1
+          name: web-app
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: STUDENT_SERVICE_BASE_URL
+              value: http://web-api:8081/api/Students
+---
+# https://docs.microsoft.com/en-us/dotnet/architecture/containerized-lifecycle/design-develop-containerized-apps/build-aspnet-core-applications-linux-containers-aks-kubernetes#deploy-webappyml
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-frontend-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app
+spec:
+  selector:
+    app: web-app
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: LoadBalancer

@@ -23,6 +23,23 @@ namespace WebApp
                 httpClient => httpClient.BaseAddress = new Uri(Configuration["STUDENT_SERVICE_BASE_URL"]));
 
             services.AddControllersWithViews();
+
+            //// Troubleshooting no data - Application Insights for .NET - Azure Monitor | Microsoft Docs
+            //// https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-troubleshoot-no-data#net-core
+            //services.AddSingleton<ITelemetryModule, FileDiagnosticsTelemetryModule>();
+
+            //services.ConfigureTelemetryModule<FileDiagnosticsTelemetryModule>((module, _) => {
+            //    module.LogFilePath = "/tmp";
+            //    module.LogFileName = "appinsights.log";
+            //    module.Severity = "Warning";
+            //});
+
+            // Azure Application Insights for ASP.NET Core applications - Azure Monitor | Microsoft Docs
+            // https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
+            services.AddApplicationInsightsTelemetry();
+
+            // <PackageReference Include="Microsoft.ApplicationInsights.SnapshotCollector" Version="1.3.7.5" />
+            //services.AddSnapshotCollector(configuration => configuration.IsEnabledInDeveloperMode = true);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

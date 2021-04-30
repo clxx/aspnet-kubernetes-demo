@@ -10,17 +10,11 @@ Make sure you have e.g. Docker Desktop installed and Kubernetes enabled: [Deploy
 
 In a Bash run
 
-`./build.sh`
-
-then
-
 `./run.sh`
 
 and simply visit <http://localhost:8080>.
 
-Tipp 1: After you have finished, you can do a "Reset Kubernetes Cluster" in Docker Desktop and then cleanup unused and dangling images.
-
-Tipp 2: You can always update a deployment by running `./run.sh` again.
+Tipp: You can always update a deployment by running `./run.sh` again.
 
 ## Running without Kubernetes
 

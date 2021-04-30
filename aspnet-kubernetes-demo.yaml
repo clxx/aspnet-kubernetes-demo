@@ -80,6 +80,11 @@ spec:
               value: Development
             - name: ASPNETCORE_URLS
               value: http://+:8081
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: applicationinsights
+                  key: connection-string-api
             - name: MSSQL_SERVER_CONNECTION_STRING
               value: Server=mssql-server;Database=AspNetKubernetesDemo;User Id=SA;Password=yourStrong(!)Password;
 ---
@@ -121,6 +126,11 @@ spec:
               value: Development
             - name: ASPNETCORE_URLS
               value: http://+:8080
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: applicationinsights
+                  key: connection-string-app
             - name: STUDENT_SERVICE_BASE_URL
               value: http://web-api:8081/api/Students
 ---
